@@ -30,6 +30,7 @@ public class UserModel implements UserDetails {
     private UUID id; 
     private String email;
     private String password;
+
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
