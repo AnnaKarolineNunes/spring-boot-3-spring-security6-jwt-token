@@ -34,7 +34,7 @@ public class AuthorizationService implements UserDetailsService{
     private TokenService tokenService;
 
     private AuthenticationManager authenticationManager;
-    
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email);
@@ -50,18 +50,30 @@ public class AuthorizationService implements UserDetailsService{
     }
 
 
-    public ResponseEntity<Object> register (@RequestBody RegisterDto registerDto){
-        if (this.userRepository.findByEmail(registerDto.email()) != null ) return ResponseEntity.badRequest().build();
+    public ResponseEntity<Object> register (@RequestBody @Valid RegisterDto registerDto) {
+        // Verifica se o e-mail já está em uso
+        if (this.userRepository.findByEmail(registerDto.email()) != null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // Encripta a senha
         String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
-        
+
+        // Cria um novo usuário
         UserModel newUser = new UserModel(registerDto.email(), encryptedPassword, registerDto.role());
         newUser.setCreatedAt(new Date(System.currentTimeMillis()));
         this.userRepository.save(newUser);
-        return ResponseEntity.ok().build();
+
+        // Gera um token JWT para o novo usuário
+        String token = tokenService.generateToken(newUser);
+
+        // Retorna a resposta com o token JWT
+        return ResponseEntity.ok(new LoginResponseDto(token));
     }
 
 
 
-    
+
+
 }
 
