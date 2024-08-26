@@ -42,6 +42,8 @@ public class UserModel implements UserDetails {
     @Column(name = "updated_at", nullable = true)
     private Date updatedAt;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;  // Novo campo para verificação de email
     
 
     public UserModel(String email, String password, UserRole userRole) {

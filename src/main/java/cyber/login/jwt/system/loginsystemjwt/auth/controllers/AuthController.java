@@ -2,10 +2,7 @@ package cyber.login.jwt.system.loginsystemjwt.auth.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import cyber.login.jwt.system.loginsystemjwt.auth.services.AuthorizationService;
 import cyber.login.jwt.system.loginsystemjwt.user.dtos.AuthetinticationDto;
@@ -28,5 +25,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody @Valid RegisterDto registerDto) {
         return authorizationService.register(registerDto);
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        return authorizationService.verifyEmail(token);
     }
 }

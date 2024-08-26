@@ -17,46 +17,73 @@ import cyber.login.jwt.system.loginsystemjwt.user.models.UserModel;
 @Service
 public class TokenService {
 
-    // O valor será injetado da variável de ambiente ou do arquivo application.properties
     @Value("${token_secret}")
     private String secret;
 
-    public String generateToken(UserModel userModel){
+    public String generateToken(UserModel userModel) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
 
             String token = JWT.create()
-                .withIssuer("auth")
-                .withSubject(userModel.getEmail())
-                .withExpiresAt(getExpirationDate())
-                .sign(algorithm);
+                    .withIssuer("auth")
+                    .withSubject(userModel.getEmail())
+                    .withExpiresAt(getExpirationDate())
+                    .sign(algorithm);
             return token;
-
-
         } catch (JWTCreationException exception) {
             throw new RuntimeException("ERROR WHILE GENERATING TOKEN", exception);
         }
     }
 
-        public String validateToken(String token){
-            try {
-                Algorithm algorithm = Algorithm.HMAC256(secret);
-
-                return JWT.require(algorithm)
-                    .withIssuer("auth")
-                    .build()
-                    .verify(token)
-                    .getSubject();
-            } 
-            
-            catch (JWTVerificationException exception) {
-                return "";
-            }
-        }
-
-        private Instant getExpirationDate(){
-            return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    public String generateVerificationToken(UserModel userModel) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            String token = JWT.create()
+                    .withIssuer("email_verification")
+                    .withSubject(userModel.getEmail())
+                    .withExpiresAt(getExpirationDate())
+                    .sign(algorithm);
+            return token;
+        } catch (JWTCreationException exception) {
+            throw new RuntimeException("Erro ao gerar token de verificação de e-mail", exception);
         }
     }
 
 
+    public String validateToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            return JWT.require(algorithm)
+                    .withIssuer("auth")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (JWTVerificationException exception) {
+            return null;
+        }
+    }
+
+    public String validateVerificationToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            return JWT.require(algorithm)
+                    .withIssuer("email_verification")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (JWTVerificationException exception) {
+            return null;
+        }
+    }
+
+    private Instant getExpirationDate() {
+        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    }
+
+    private Instant getExpirationDateForEmailVerification() {
+        return LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.of("-03:00"));  // 1 dia de validade
+    }
+
+}
